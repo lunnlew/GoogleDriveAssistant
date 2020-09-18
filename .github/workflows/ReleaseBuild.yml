@@ -27,13 +27,15 @@ jobs:
       run: |
         yarn
     - name: electron-build
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         yarn run electron:build
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1.0.0
       env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
@@ -42,7 +44,7 @@ jobs:
     - name: Upload Release Asset For Win
       uses: actions/upload-release-asset@v1.0.1
       env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./dist_electron/GoogleDrive助手 Setup ${{ matrix.app-version }}.exe
