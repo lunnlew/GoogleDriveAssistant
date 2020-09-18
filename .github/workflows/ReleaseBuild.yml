@@ -45,6 +45,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist_electron/GoogleDrive助手 ${{ matrix.app-version }}.exe
+        asset_path: ./dist_electron/GoogleDrive助手 Setup ${{ matrix.app-version }}.exe
         asset_name: GoogleDrive助手-Setup-${{ matrix.node-arch }}-${{ matrix.app-version }}.exe
         asset_content_type: application/x-executable 
