@@ -1,0 +1,50 @@
+name: Release Build
+on:
+  push:
+    tags:
+    - 'v*'
+jobs:
+  windows-build:
+    runs-on: windows-2019
+    strategy:
+      matrix:
+        node-version: [12.x]
+        node-arch: ['x86']
+        node-registry: ['https://registry.yarnpkg.com']
+        app-version: ['1.0.0']
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: lunnlew/setup-node@v1.4.0
+      with:
+        node-version: ${{ matrix.node-version }}
+        node-arch: ${{ matrix.node-arch }}
+        registry-url: ${{ matrix.node-registry }}
+    - name: install tool yarn
+      run: |
+        npm install yarn -g
+    - name: yarn install deps
+      run: |
+        yarn
+    - name: electron-build
+      run: |
+        yarn run electron:build
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset For Win
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist_electron/GoogleDrive助手 ${{ matrix.app-version }}.exe
+        asset_name: GoogleDrive助手-Setup-${{ matrix.node-arch }}-${{ matrix.app-version }}.exe
+        asset_content_type: application/x-executable 
