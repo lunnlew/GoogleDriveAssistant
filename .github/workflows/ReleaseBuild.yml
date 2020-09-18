@@ -48,5 +48,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./dist_electron/GoogleDrive助手 Setup ${{ matrix.app-version }}.exe
-        asset_name: GoogleDrive助手-Setup-${{ matrix.node-arch }}-${{ matrix.app-version }}.exe
+        asset_name: GoogleDriveAssistant-Setup-${{ matrix.node-arch }}-${{ matrix.app-version }}.exe
         asset_content_type: application/x-executable 
