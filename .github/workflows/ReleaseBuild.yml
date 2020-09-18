@@ -4,12 +4,13 @@ on:
     tags:
     - 'v*'
 jobs:
-  windows-build:
-    runs-on: windows-2019
+  release-build:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [windows-2019, macos-10.15]
         node-version: [12.x]
-        node-arch: ['x86']
+        node-arch: ['x64']
         node-registry: ['https://registry.yarnpkg.com']
         app-version: ['1.0.0']
     steps:
@@ -42,6 +43,7 @@ jobs:
         draft: false
         prerelease: false
     - name: Upload Release Asset For Win
+      if: matrix.os == 'windows-2019'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,3 +52,13 @@ jobs:
         asset_path: ./dist_electron/GoogleDrive助手 Setup ${{ matrix.app-version }}.exe
         asset_name: GoogleDriveAssistant-Setup-${{ matrix.node-arch }}-${{ matrix.app-version }}.exe
         asset_content_type: application/x-executable 
+    - name: Upload Release Asset For Mac
+      if: matrix.os == 'macos-10.15'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist_electron/GoogleDrive助手 Setup ${{ matrix.app-version }}.dmg
+        asset_name: GoogleDriveAssistant-Setup-${{ matrix.node-arch }}-${{ matrix.app-version }}.dmg
+        asset_content_type: application/octet-stream
