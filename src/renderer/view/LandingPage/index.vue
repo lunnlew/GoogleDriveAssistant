@@ -63,6 +63,7 @@ export default {
     padding: 10rem 0 0 0;
     .tip-text {
       margin-bottom: 2rem;
+      color: #000000;
     }
   }
 }
