@@ -26,7 +26,7 @@
                 :loading="taskLoading[row.task_id]"
                 @click="startTaskItem(row)"
                 v-if="!row.is_complete"
-              >启动</Button>
+              >{{taskLoading[row.task_id]?'进行中':'启动'}}</Button>
               <Button type="error" @click="deleteItem(row)">删除</Button>
             </template>
           </Table>
@@ -59,10 +59,7 @@
         <div style="text-align:center">
           <div style="padding-bottom: 10px">
             <Input enter-button placeholder="需要抓取的链接" v-model="shareLink" />
-            <Alert
-              :type="submitStartTaskResult==200?'success':'error'"
-              v-if="submitStartTaskResult"
-            >创建{{submitStartTaskResult==200?'成功':'失败'}}</Alert>
+            <Alert :type="alertType" v-if="showAlert">{{alertInfo}}</Alert>
           </div>
         </div>
         <div slot="footer">
@@ -85,10 +82,12 @@ export default {
       showExtraData: {},
       currentPage: 1,
       pageSize: 10,
-      submitStartTaskResult: false,
       total: 0,
       taskList: [],
       shareLink: '',
+      alertType: 'success',
+      alertInfo: '',
+      showAlert: false,
       columns: [{
         title: '任务ID',
         key: 'task_id',
@@ -130,7 +129,6 @@ export default {
     showNewTask () {
       this.newTaskModel = true
       this.shareLink = ''
-      this.submitStartTaskResult = false
     },
     async submitStartTask () {
       if (!this.shareLink || this.shareLink == '') {
@@ -139,8 +137,8 @@ export default {
       let res = await newTask({
         link: this.shareLink
       })
-      this.submitStartTaskResult = res || res.code
       if (res && res.code == 200) {
+        this.showAlert = false
         this.newTaskModel = false
         this.loadData()
         startTask({
@@ -150,8 +148,11 @@ export default {
           'task_id': res.data.task_id,
           'loading': true
         })
+      } else {
+        this.showAlert = true
+        this.alertType = 'error'
+        this.alertInfo = res.message
       }
-      this.submitStartTaskResult = false
     },
     startTaskItem (row) {
       this.$store.dispatch('updateTaskLoading', {
