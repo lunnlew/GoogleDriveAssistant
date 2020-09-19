@@ -56,9 +56,23 @@
           <Icon type="ios-information-circle"></Icon>
           <span>新建任务</span>
         </p>
-        <div style="text-align:center">
+        <div>
           <div style="padding-bottom: 10px">
-            <Input enter-button placeholder="需要抓取的链接" v-model="shareLink" />
+            <Form :model="formItem" :label-width="80">
+              <FormItem label="链接">
+                <Input v-model="formItem.link" placeholder="需要抓取的链接" />
+              </FormItem>
+              <FormItem label="存盘">
+                <Select v-model="formItem.drive_id">
+                  <Option value="root">MyDrive (个人盘)</Option>
+                  <Option
+                    v-for="drive in driveList"
+                    :key="drive.drive_id"
+                    :value="drive.drive_id"
+                  >{{drive.drive_name}} (共享盘,ID:{{drive.drive_id}})</Option>
+                </Select>
+              </FormItem>
+            </Form>
             <Alert :type="alertType" v-if="showAlert">{{alertInfo}}</Alert>
           </div>
         </div>
@@ -70,21 +84,25 @@
   </div>
 </template>
 <script>
-import { fetchTaskList, newTask, startTask, deleteTask } from '@/api/source'
+import { fetchTaskList, newTask, startTask, deleteTask, fetchDriveList } from '@/api/source'
 export default {
   name: 'TaskListView',
   components: {},
   props: [],
   data: () => {
     return {
+      formItem: {
+        link: '',
+        drive_id: 'root'
+      },
       newTaskModel: false,
       showExtraInfo: false,
+      driveList: [],
       showExtraData: {},
       currentPage: 1,
       pageSize: 10,
       total: 0,
       taskList: [],
-      shareLink: '',
       alertType: 'success',
       alertInfo: '',
       showAlert: false,
@@ -126,17 +144,18 @@ export default {
     changeSizePage (size) {
       this.pageSize = size
     },
-    showNewTask () {
+    async showNewTask () {
       this.newTaskModel = true
-      this.shareLink = ''
+      let res = await fetchDriveList({
+        page: this.currentPage,
+        size: this.pageSize
+      })
+      if (res && res.code == 200) {
+        this.driveList = res.data.list
+      }
     },
     async submitStartTask () {
-      if (!this.shareLink || this.shareLink == '') {
-        return
-      }
-      let res = await newTask({
-        link: this.shareLink
-      })
+      let res = await newTask(this.formItem)
       if (res && res.code == 200) {
         this.showAlert = false
         this.newTaskModel = false

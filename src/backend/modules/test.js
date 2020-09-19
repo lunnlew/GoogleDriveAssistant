@@ -77,6 +77,26 @@ exports.default = async (req, res, app) => {
       })
       break
     }
+    case 't4': {
+      let data = await new Promise((resolve, reject) => {
+        drive.permissions.list({
+          fileId: '0AJ1g4zqLDS1TUk9PVA',
+          supportsAllDrives: true
+        }, (err, res) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(res.data)
+          }
+        })
+      })
+      res.send({
+        'code': 200,
+        'data': data,
+        'message': 'test done'
+      })
+      break
+    }
     default:
       res.send({
         code: 200,

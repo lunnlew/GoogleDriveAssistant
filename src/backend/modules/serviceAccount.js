@@ -61,6 +61,13 @@ exports.default = async (req, res, app) => {
         // console.log(response)
       }
 
+      if (!('services' in response) || !response.services.find(p => p.name === `projects/${project.projectNumber}/services/cloudidentity.googleapis.com`)) {
+        response = (await google.serviceusage('v1beta1').services.enable({
+          name: `projects/${project.projectNumber}/services/cloudidentity.googleapis.com`
+        })).data
+        // console.log(response)
+      }
+
       // roles/iam.serviceAccountAdmin
       // roles/iam.serviceAccountUser
       let IamPolicys = (await resource.projects.getIamPolicy({

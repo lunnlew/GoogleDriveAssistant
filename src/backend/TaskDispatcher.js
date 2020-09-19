@@ -6,13 +6,15 @@ const { googleInit } = require('./googleClient')
 const { copyDirSeries, batchCopyFile } = require('./batchs/copy')
 
 class TaskDispatcher extends events.EventEmitter {
-  constructor(application, task_id, wsclientid, options) {
+  constructor(application, params, wsclientid, options) {
     super(options);
     this.application = application
+    const { task_id } = params
     this.task_id = task_id
     this.wsclientid = wsclientid
     this.recorder = application.recorder
     this.credentials = undefined
+    this.save_drive_id = undefined
   }
   init () {
     this.on('startFetchOriginList', () => {
@@ -130,6 +132,9 @@ class TaskDispatcher extends events.EventEmitter {
   async start () {
     let recorder = this.recorder
     let list = await recorder.findItems({ 'item_type': 'task', 'task_id': this.task_id })
+    if (list.length) {
+      this.save_drive_id = list[0].drive_id || ''
+    }
     if (list.length && !list[0].is_listed) {
       this.emit('total_items', {
         num: 1
@@ -264,7 +269,8 @@ class TaskDispatcher extends events.EventEmitter {
           let ids = []
           let result = await new Promise((resolve, reject) => {
             drive.files.generateIds({
-              count: Math.min(size, count)
+              count: Math.min(size, count),
+              space: 'drive'
             }, (err, res) => {
               if (err) {
                 reject(err)
@@ -311,7 +317,7 @@ class TaskDispatcher extends events.EventEmitter {
               await this.recorder.updateItem({ 'item_type': 'file', 'task_id': task_id, file_id: item.file_id },
                 {
                   $set: {
-                    dst_parent_id: ''
+                    dst_parent_id: this.save_drive_id
                   }
                 })
             }
@@ -330,7 +336,7 @@ class TaskDispatcher extends events.EventEmitter {
         })
         if (list.length) {
           console.log('batch list', list.length)
-          let complete_files = await copyDirSeries(list, { application })
+          let complete_files = await copyDirSeries(list, { application, save_drive_id: this.save_drive_id })
           this.emit('dealed_items', {
             num: complete_files.length
           })
@@ -356,7 +362,7 @@ class TaskDispatcher extends events.EventEmitter {
         })
         if (list.length) {
           console.log('batch list', list.length)
-          let complete_files = await batchCopyFile(list, { application })
+          let complete_files = await batchCopyFile(list, { application, save_drive_id: this.save_drive_id })
           this.emit('dealed_items', {
             num: complete_files.length
           })

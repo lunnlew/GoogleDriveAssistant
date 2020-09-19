@@ -11,6 +11,7 @@ exports.default = async (req, res, application) => {
   switch (ctl) {
     case "newTask": {
       let link = body.link
+      let drive_id = body.drive_id
       let folder_id
       if (link) {
         folder_id = link.match(/([\w|\-|\d]{30,})/)[0]
@@ -65,6 +66,7 @@ exports.default = async (req, res, application) => {
           item_type: 'task',
           task_id: task_id,
           folder_id: folder_id,
+          drive_id: drive_id,
           is_folder: 'application/vnd.google-apps.folder' === result.mimeType,
           origin_params: JSON.stringify({
             from_link: link
@@ -90,7 +92,7 @@ exports.default = async (req, res, application) => {
     case "startTask": {
       let task_id = body.task_id
       console.log('task_id:' + task_id)
-      new TaskDispatcher(application, task_id, wsclientid).init().start()
+      new TaskDispatcher(application, body, wsclientid).init().start()
       res.send({
         code: 200,
         message: '启动任务成功'

@@ -2,10 +2,11 @@ const async = require('async')
 const { googleInit } = require('../googleClient')
 
 async function copyDirSeries (files, options) {
-  const { application } = options
+  const { application, save_drive_id } = options
   const { google, credentials } = await googleInit(application, true)
   const drive = google.drive({ version: 'v3' });
   var complete_files = []
+  console.log('copyDirSeries to drive_id', save_drive_id)
   return new Promise((resolve, reject) => {
     async.eachSeries(files, function (file, copyCallback) {
       drive.files.create({
@@ -48,13 +49,15 @@ async function copyDirSeries (files, options) {
 }
 
 async function batchCopyFile (files, options) {
-  const { application } = options
+  const { application, save_drive_id } = options
   const { google, credentials } = await googleInit(application, true)
   const drive = google.drive({ version: 'v3' });
   var complete_files = []
+  console.log('batchCopyFile to drive_id', save_drive_id)
   return new Promise((resolve, reject) => {
     async.eachLimit(files, 5, function (file, copyCallback) {
       drive.files.copy({
+        supportsAllDrives: true,
         fileId: file.file_id,
         requestBody: {
           mimeType: file.file_mimetype,
