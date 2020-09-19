@@ -102,3 +102,36 @@ export function deleteServiceAccount (data) {
     data
   })
 }
+export function fetchDriveList (data) {
+  return request({
+    url: '/',
+    method: 'post',
+    params: {
+      action: 'drive',
+      ctl: 'list'
+    },
+    data
+  })
+}
+export function syncDriveList (data) {
+  return request({
+    url: '/',
+    method: 'post',
+    params: {
+      action: 'drive',
+      ctl: 'sync'
+    },
+    data
+  })
+}
+export function openDriveUrl (data) {
+  return request({
+    url: '/',
+    method: 'post',
+    params: {
+      action: 'drive',
+      ctl: 'open'
+    },
+    data
+  })
+}

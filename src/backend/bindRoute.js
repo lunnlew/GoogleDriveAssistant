@@ -69,6 +69,10 @@ var bindRoute = (app, express) => {
           bind = require('./modules/checkInit')
           break
         }
+        case 'drive': {
+          bind = require('./modules/drive')
+          break
+        }
         case 'task': {
           bind = require('./modules/task')
           break

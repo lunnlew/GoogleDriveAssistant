@@ -91,6 +91,9 @@ export default {
       }, {
         'name': '服务账号',
         'view': 'ServiceAccountsView/index'
+      }, {
+        'name': 'Drive列表',
+        'view': 'DriveListView/index'
       }]
     }
   },
