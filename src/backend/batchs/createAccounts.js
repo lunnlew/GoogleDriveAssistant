@@ -9,7 +9,7 @@ async function run (list, options) {
   const resource = google.cloudresourcemanager('v1beta1')
   let completed_account = []
   return new Promise((resolve, reject) => {
-    async.eachSeries(list, (request, listCallback) => {
+    async.eachLimit(list, 5, (request, listCallback) => {
       iam.projects.serviceAccounts.create(request, async (err, res) => {
         if (err) {
           listCallback(err);
