@@ -54,14 +54,17 @@
           <div style="padding-bottom: 10px">
             <Input enter-button placeholder="项目名称" v-model="projectName" />
             <Input enter-button placeholder="账号数量" v-model="accountsNum" />
-            <Alert
-              :type="submitCreateServiceAccountsResult==200?'success':'error'"
-              v-if="submitCreateServiceAccountsResult"
-            >创建{{submitCreateServiceAccountsResult==200?'成功':'失败'}}</Alert>
+            <Alert :type="alertType" v-if="showAlert">{{alertInfo}}</Alert>
           </div>
         </div>
         <div slot="footer">
-          <Button type="primary" size="large" long @click="submitCreateServiceAccounts">提交</Button>
+          <Button
+            type="primary"
+            size="large"
+            long
+            :loading="createLoading"
+            @click="submitCreateServiceAccounts"
+          >提交</Button>
         </div>
       </Modal>
     </div>
@@ -78,9 +81,12 @@ export default {
       createServiceAccountsModel: false,
       showExtraInfo: false,
       showExtraData: {},
+      createLoading: false,
       currentPage: 1,
       pageSize: 10,
-      submitCreateServiceAccountsResult: false,
+      alertType: 'success',
+      alertInfo: '',
+      showAlert: false,
       total: 0,
       accountsList: [],
       projectName: 'quickstart',
@@ -140,22 +146,27 @@ export default {
       this.projectName = 'quickstart'
       this.accountsNum = 10
       this.createServiceAccountsModel = true
-      this.submitCreateServiceAccountsResult = false
+      this.showAlert = false
     },
     async submitCreateServiceAccounts () {
       if (!this.projectName || !this.accountsNum) {
         return
       }
+      this.createLoading = true
       let res = await createServiceAccounts({
         projectName: this.projectName,
         accountsNum: this.accountsNum
       })
-      this.submitCreateServiceAccountsResult = res || res.code
       if (res && res.code == 200) {
+        this.showAlert = false
         this.createServiceAccountsModel = false
         this.loadData()
+      } else {
+        this.showAlert = true
+        this.alertType = 'error'
+        this.alertInfo = res.message
       }
-      this.submitCreateServiceAccountsResult = false
+      this.createLoading = false
     },
     async deleteItem (row) {
       let res = await deleteServiceAccount({
