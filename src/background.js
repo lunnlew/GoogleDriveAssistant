@@ -66,6 +66,9 @@ function createWindow () {
 
   createMenu()
 
+  // 启动更新服务
+  require('update-electron-app')()
+
   // 启动后端服务
   require('./backend/index')
 }
