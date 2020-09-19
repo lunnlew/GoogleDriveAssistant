@@ -22,16 +22,16 @@ jobs:
         node-arch: ${{ matrix.node-arch }}
         registry-url: ${{ matrix.node-registry }}
     - name: Create Release
-    if: matrix.os == 'windows-2019'
-    id: create_release
-    uses: actions/create-release@v1
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    with:
-      tag_name: ${{ github.ref }}
-      release_name: Release ${{ github.ref }}
-      draft: true
-      prerelease: false
+      if: matrix.os == 'windows-2019'
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
     - name: install tool yarn
       run: |
         npm install yarn -g
