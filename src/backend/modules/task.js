@@ -22,11 +22,11 @@ exports.default = async (req, res, application) => {
       const drive = google.drive({ version: 'v3' });
       let result = await new Promise((resolve, reject) => {
         drive.files.get({
+          supportsAllDrives: true,
           fileId: folder_id
         }, (err, res) => {
           if (err) {
             reject(err)
-            return
           } else {
             resolve(res)
           };

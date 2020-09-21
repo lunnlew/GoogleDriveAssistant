@@ -174,15 +174,17 @@ class TaskDispatcher extends events.EventEmitter {
           do {
             let result = await new Promise((resolve, reject) => {
               drive.files.list({
+                corpora: 'allDrives',
+                supportsAllDrives: true,
+                includeItemsFromAllDrives: true,
                 q: `'${fid}' in parents and trashed=false`,
                 spaces: 'drive',
                 pageSize: 1000,
                 pageToken,
-                fields: 'nextPageToken, files(id, name, kind, capabilities/canListChildren, capabilities/canCopy, mimeType, size, md5Checksum)',
+                fields: 'nextPageToken, files(id, name, kind, mimeType, size, md5Checksum)',
               }, (err, res) => {
                 if (err) {
                   reject(err)
-                  return
                 } else {
                   resolve(res.data)
                 };

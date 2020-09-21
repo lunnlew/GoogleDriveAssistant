@@ -8,6 +8,7 @@ exports.default = async (req, res, app) => {
     case "t1": {
       let data = await new Promise((resolve, reject) => {
         drive.files.list({
+          supportsAllDrives: true,
           q: `trashed=false`,
           spaces: 'drive',
           pageSize: 1000,
