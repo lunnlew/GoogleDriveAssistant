@@ -42,7 +42,8 @@ class TaskDispatcher extends events.EventEmitter {
     this.on('total_items', async (data) => {
       await this.recorder.updateItem({ 'item_type': 'task', 'task_id': this.task_id }, {
         $inc: {
-          total_items: data.num
+          total_items: data.num,
+          total_size: data.size || 0
         }
       })
       this.sendMsg({
@@ -50,14 +51,16 @@ class TaskDispatcher extends events.EventEmitter {
         'data': {
           event: 'total_items',
           task_id: this.task_id,
-          total_items: data.num
+          total_items: data.num,
+          total_size: data.size || 0
         }
       })
     })
     this.on('dealed_items', async (data) => {
       await this.recorder.updateItem({ 'item_type': 'task', 'task_id': this.task_id }, {
         $inc: {
-          dealed_items: data.num
+          dealed_items: data.num || 0,
+          dealed_size: data.size || 0
         }
       })
       this.sendMsg({
@@ -65,7 +68,8 @@ class TaskDispatcher extends events.EventEmitter {
         'data': {
           event: "dealed_items",
           task_id: this.task_id,
-          dealed_items: data.num
+          dealed_items: data.num,
+          dealed_size: data.size
         }
       })
     })
@@ -137,7 +141,8 @@ class TaskDispatcher extends events.EventEmitter {
     }
     if (list.length && !list[0].is_listed) {
       this.emit('total_items', {
-        num: 1
+        num: 1,
+        size: 0
       })
       this.emit('startFetchOriginList');
     } else if (list.length && !list[0].is_complete) {
@@ -204,7 +209,7 @@ class TaskDispatcher extends events.EventEmitter {
                 parent_id: fid,
                 dst_file_id: undefined,
                 file_mimetype: file.mimeType,
-                file_size: file.size,
+                file_size: parseInt(file.size),
                 is_copyed: false,
                 index: index,
                 create_time: current_time,
@@ -216,7 +221,8 @@ class TaskDispatcher extends events.EventEmitter {
             if (filtered.length) {
               console.log('filtered length', filtered.length)
               this.emit('total_items', {
-                num: filtered.length
+                num: filtered.length,
+                size: filtered.reduce((total, val) => total + parseInt(val.file_size), 0)
               })
               await recorder.insertItem(filtered)
             }
@@ -332,6 +338,7 @@ class TaskDispatcher extends events.EventEmitter {
       } while (dst_list.length)
 
       let page = 1
+      size = 5
       do {
         list = await recorder.findItems({ 'item_type': 'file', 'task_id': task_id, 'file_mimetype': 'application/vnd.google-apps.folder', 'is_copyed': false }, page, size, {
           index: 1
@@ -340,7 +347,8 @@ class TaskDispatcher extends events.EventEmitter {
           console.log('batch list', list.length)
           let complete_files = await copyDirSeries(list, { application, save_drive_id: this.save_drive_id })
           this.emit('dealed_items', {
-            num: complete_files.length
+            num: complete_files.length,
+            size: 0
           })
           await this.recorder.updateItem({ 'item_type': 'file', 'task_id': task_id, 'file_id': { $in: complete_files } },
             {
@@ -366,9 +374,10 @@ class TaskDispatcher extends events.EventEmitter {
           console.log('batch list', list.length)
           let complete_files = await batchCopyFile(list, { application, save_drive_id: this.save_drive_id })
           this.emit('dealed_items', {
-            num: complete_files.length
+            num: complete_files.length,
+            size: complete_files.reduce((total, val) => total + parseInt(val.file_size), 0)
           })
-          await recorder.updateItem({ 'item_type': 'file', 'task_id': task_id, 'file_id': { $in: complete_files } },
+          await recorder.updateItem({ 'item_type': 'file', 'task_id': task_id, 'file_id': { $in: complete_files.map(f => f.file_id) } },
             {
               $set: {
                 is_copyed: true

@@ -23,8 +23,14 @@ const mutations = {
       if ('total_items' in data.result) {
         status.total_items = (state.taskStatus[data.task_id].total_items || 0) + data.result.total_items
       }
+      if ('total_size' in data.result) {
+        status.total_size = (state.taskStatus[data.task_id].total_size || 0) + data.result.total_size
+      }
       if ('dealed_items' in data.result) {
         status.dealed_items = (state.taskStatus[data.task_id].dealed_items || 0) + data.result.dealed_items
+      }
+      if ('dealed_size' in data.result) {
+        status.dealed_size = (state.taskStatus[data.task_id].dealed_size || 0) + data.result.dealed_size
       }
       state.taskStatus = Object.assign({}, state.taskStatus, {
         [data.task_id]: {

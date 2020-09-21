@@ -16,7 +16,7 @@
             >{{ row.create_time | fmtDate('yyyy-MM-dd hh:mm') }}</template>
             <template slot-scope="{ row }" slot="task_id">{{ row.task_id}}</template>
             <template slot-scope="{ row }" slot="dealed_items">
-              {{ row|buildProgress(taskStatus[row.task_id], 'dealed_items')}} / {{ row|buildProgress(taskStatus[row.task_id], 'total_items')}}
+              {{ row|buildProgress(taskStatus[row.task_id])}}
               <br />
               {{taskStatus[row.task_id]|buildInfo}}
             </template>
@@ -203,16 +203,24 @@ export default {
     }
   },
   filters: {
-    buildProgress (row, taskStatus, field) {
-      if (taskStatus && field in taskStatus && taskStatus[field]) {
-        if (field === 'dealed_items') {
-          return row[field] + taskStatus[field]
-        } else {
-          return taskStatus[field]
+    buildProgress (row, taskStatus) {
+      var buildSize = (size) => {
+        if (null == size || size == '') {
+          return "0 Bytes";
         }
-      } else {
-        return row[field]
+        var unitArr = new Array("Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB");
+        var index = 0;
+        var srcsize = parseFloat(size);
+        index = Math.floor(Math.log(srcsize) / Math.log(1024));
+        var size = srcsize / Math.pow(1024, index);
+        size = size.toFixed(2);//保留的小数位数
+        return size + unitArr[index];
       }
+      let dealed_items = taskStatus && taskStatus['dealed_items'] ? row['dealed_items'] + taskStatus['dealed_items'] : row['dealed_items']
+      let dealed_size = taskStatus && taskStatus['dealed_size'] ? row['dealed_size'] + taskStatus['dealed_size'] : row['dealed_size']
+      let total_items = taskStatus && taskStatus['total_items'] ? row['total_items'] + taskStatus['total_items'] : row['total_items']
+      let total_size = taskStatus && taskStatus['total_size'] ? row['total_size'] + taskStatus['total_size'] : row['total_size']
+      return `(文件:${dealed_items || 0}/${total_items || 0}, 大小:${buildSize(dealed_size || 0)}/${buildSize(total_size || 0)})`
     },
     buildInfo (record) {
       if (record) {

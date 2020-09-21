@@ -71,7 +71,7 @@ async function batchCopyFile (files, options) {
             console.log('batchCopyFile status', err.response.status, err.errors[0].message)
             // 409已存在
             if ([409].indexOf(err.response.status) !== -1) {
-              complete_files.push(file.file_id)
+              complete_files.push(file)
               copyCallback();
             } else {
               copyCallback(err);
@@ -80,7 +80,7 @@ async function batchCopyFile (files, options) {
             copyCallback(err);
           }
         } else {
-          complete_files.push(file.file_id)
+          complete_files.push(file)
           copyCallback();
         };
       })

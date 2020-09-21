@@ -74,8 +74,9 @@ exports.default = async (req, res, application) => {
           is_listed: false,
           is_complete: false,
           total_items: 0,
+          total_size: 0,
           dealed_items: 0,
-          task_state: 0,
+          dealed_size: 0,
           create_time: current_time,
           update_time: current_time
         })
