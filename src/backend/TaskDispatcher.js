@@ -308,14 +308,20 @@ class TaskDispatcher extends events.EventEmitter {
 
       let page = 1
       size = 5
+      let index
       do {
         list = await recorder.findItems({ 'item_type': 'file', 'task_id': task_id, 'file_mimetype': 'application/vnd.google-apps.folder', 'is_copyed': false }, page, size, {
           index: 1
         })
         if (list.length) {
-          let index = list[0].index
+          if (list[0].index > index) {
+            await new Promise(resolve => {
+              setTimeout(() => resolve(), 100)
+            })
+          }
+          index = list[0].index
           let filter_list = list.filter(f => f.index === index)
-          console.log('batch filter_list', filter_list.length)
+          console.log('copyDirSeries filter_list length', filter_list.length)
           let complete_files = await copyDirSeries(filter_list, { application, save_drive_id: this.save_drive_id })
           this.emit('dealed_items', {
             num: complete_files.length,
@@ -327,11 +333,10 @@ class TaskDispatcher extends events.EventEmitter {
                 is_copyed: true
               }
             }, { multi: true })
-          page = page + 1
         }
 
         await new Promise(resolve => {
-          setTimeout(() => resolve(), 10)
+          setTimeout(() => resolve(), 20)
         })
       } while (list.length)
 
@@ -354,9 +359,7 @@ class TaskDispatcher extends events.EventEmitter {
                 is_copyed: true
               }
             }, { multi: true })
-          page = page + 1
         }
-
         await new Promise(resolve => {
           setTimeout(() => resolve(), 10)
         })
