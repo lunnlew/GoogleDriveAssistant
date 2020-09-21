@@ -1,6 +1,6 @@
 {
   "name": "drive_assistant",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "drive_assistant",
   "main": "background.js",
   "engines": {
