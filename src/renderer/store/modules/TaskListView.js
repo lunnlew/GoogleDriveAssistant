@@ -1,5 +1,3 @@
-import { articleDelete, uniaccDelete, proxyAct, wechatAct, jobAct } from '@/api/source'
-
 const state = {
   taskLoading: {},
   taskStatus: {}
@@ -13,6 +11,11 @@ const mutations = {
       state.taskLoading = Object.assign({}, state.taskLoading, {
         [data.task_id]: data.loading
       })
+    }
+  },
+  resetTaskStatus (state, data) {
+    if (data.task_id in state.taskStatus) {
+      state.taskStatus[data.task_id] = {}
     }
   },
   updateTaskStatus (state, data) {
@@ -48,6 +51,9 @@ const actions = {
   },
   updateTaskStatus ({ commit }, data) {
     commit('updateTaskStatus', data)
+  },
+  resetTaskStatus ({ commit }, data) {
+    commit('resetTaskStatus', data)
   }
 }
 

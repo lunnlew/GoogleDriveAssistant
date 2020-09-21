@@ -216,7 +216,7 @@ class TaskDispatcher extends events.EventEmitter {
                 update_time: current_time
               }
             })
-            let exs = await recorder.findItems({ 'item_type': 'file', /*'task_id': task_id,*/ 'file_id': { $in: records.map(f => f.file_id) } })
+            let exs = await recorder.findItems({ 'item_type': 'file', 'task_id': task_id, 'file_id': { $in: records.map(f => f.file_id) } })
             let filtered = records.filter(f => exs.map(e => e.file_id).indexOf(f.file_id) === -1)
             if (filtered.length) {
               console.log('filtered length', filtered.length)
