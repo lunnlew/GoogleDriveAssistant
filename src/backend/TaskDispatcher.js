@@ -316,7 +316,7 @@ class TaskDispatcher extends events.EventEmitter {
         if (list.length) {
           if (list[0].index > index) {
             await new Promise(resolve => {
-              setTimeout(() => resolve(), 100)
+              setTimeout(() => resolve(), 30)
             })
           }
           index = list[0].index
@@ -334,10 +334,6 @@ class TaskDispatcher extends events.EventEmitter {
               }
             }, { multi: true })
         }
-
-        await new Promise(resolve => {
-          setTimeout(() => resolve(), 20)
-        })
       } while (list.length)
 
       page = 1
