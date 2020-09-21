@@ -4,6 +4,7 @@ const path = require('path')
 const child_process = require('child_process')
 const { googleInit } = require('./googleClient')
 const { copyDirSeries, batchCopyFile } = require('./batchs/copy')
+const { batchListFile } = require('./batchs/list')
 
 class TaskDispatcher extends events.EventEmitter {
   constructor(application, params, wsclientid, options) {
@@ -140,10 +141,6 @@ class TaskDispatcher extends events.EventEmitter {
       this.save_drive_id = list[0].drive_id || ''
     }
     if (list.length && !list[0].is_listed) {
-      this.emit('total_items', {
-        num: 1,
-        size: 0
-      })
       this.emit('startFetchOriginList');
     } else if (list.length && !list[0].is_complete) {
       this.emit('startMakeStruct');
@@ -162,62 +159,25 @@ class TaskDispatcher extends events.EventEmitter {
         return
       }
       if (list && list[0].is_folder) {
-
         let folder = list[0]
-        let current_time = Math.round(new Date() / 1000)
         let index = 1
         console.log('查询[folder_id:' + folder.folder_id + '] list items')
-        const { google, credentials } = await googleInit(application, true)
-        this.credentials = credentials
-        const drive = google.drive({ version: 'v3' });
-        let pageToken
-        let queue_folder = [folder.folder_id]
-        let fid
+        let queue_folder = [[{
+          file_id: folder.folder_id
+        }]]
+        let queue_item
         do {
-          fid = queue_folder.shift()
-          console.log('use folder_id:', fid)
-          do {
-            let result = await new Promise((resolve, reject) => {
-              drive.files.list({
-                corpora: 'allDrives',
-                supportsAllDrives: true,
-                includeItemsFromAllDrives: true,
-                q: `'${fid}' in parents and trashed=false`,
-                spaces: 'drive',
-                pageSize: 1000,
-                pageToken,
-                fields: 'nextPageToken, files(id, name, kind, mimeType, size, md5Checksum)',
-              }, (err, res) => {
-                if (err) {
-                  reject(err)
-                } else {
-                  resolve(res.data)
-                };
-              })
-            })
-            console.log('list result', result.files.length)
-            pageToken = result.nextPageToken;
-            let files = result.files;
-            let records = files.map(file => {
-              // console.log(file.id, file.name)
-              index = index + 1
-              return {
-                item_type: 'file',
-                task_id: task_id,
-                file_id: file.id,
-                file_name: file.name,
-                parent_id: fid,
-                dst_file_id: undefined,
-                file_mimetype: file.mimeType,
-                file_size: parseInt(file.size),
-                is_copyed: false,
-                index: index,
-                create_time: current_time,
-                update_time: current_time
-              }
-            })
-            let exs = await recorder.findItems({ 'item_type': 'file', 'task_id': task_id, 'file_id': { $in: records.map(f => f.file_id) } })
-            let filtered = records.filter(f => exs.map(e => e.file_id).indexOf(f.file_id) === -1)
+          queue_item = queue_folder.shift()
+          console.log('queue_item length:', queue_item.length)
+          let complete_files = await batchListFile({
+            files: queue_item,
+            task_id,
+            index
+          }, { application })
+          console.log('queue_item result length:', complete_files.length)
+          if (complete_files.length) {
+            let exs = await recorder.findItems({ 'item_type': 'file', 'task_id': task_id, 'file_id': { $in: complete_files.map(f => f.file_id) } })
+            let filtered = complete_files.filter(f => exs.map(e => e.file_id).indexOf(f.file_id) === -1)
             if (filtered.length) {
               console.log('filtered length', filtered.length)
               this.emit('total_items', {
@@ -226,11 +186,13 @@ class TaskDispatcher extends events.EventEmitter {
               })
               await recorder.insertItem(filtered)
             }
-            queue_folder.push(...files.filter(file => file.mimeType == 'application/vnd.google-apps.folder').map(file => file.id));
-          } while (pageToken)
-          pageToken = undefined
+            let folders = complete_files.filter(file => file.file_mimetype == 'application/vnd.google-apps.folder')
+            if (folders.length) {
+              queue_folder.push(folders);
+            }
+          }
+          index = index + 1
         } while (queue_folder.length)
-
       }
 
       await recorder.updateItem({
@@ -309,11 +271,18 @@ class TaskDispatcher extends events.EventEmitter {
       do {
         console.log('use new parent_id')
         dst_list = await recorder.findItems({ 'item_type': 'file', 'task_id': task_id, dst_parent_id: { $exists: false } }, 1, size)
+        let parents_cache = {}
         if (dst_list.length) {
           for (let item of dst_list) {
             if (item.parent_id) {
-              let parent = await recorder.findItems({ 'item_type': 'file', 'task_id': task_id, file_id: item.parent_id }, 1, 1)
-              parent = parent[0]
+              let parent = {}
+              if (item.parent_id in parents_cache) {
+                parent = parents_cache[item.parent_id]
+              } else {
+                parent = await recorder.findItems({ 'item_type': 'file', 'task_id': task_id, file_id: item.parent_id }, 1, 1)
+                parent = parent[0]
+                parents_cache[item.parent_id] = parent
+              }
               await this.recorder.updateItem({ 'item_type': 'file', 'task_id': task_id, file_id: item.file_id },
                 {
                   $set: {
@@ -333,7 +302,7 @@ class TaskDispatcher extends events.EventEmitter {
         }
 
         await new Promise(resolve => {
-          setTimeout(() => resolve(), 50)
+          setTimeout(() => resolve(), 10)
         })
       } while (dst_list.length)
 
@@ -344,8 +313,10 @@ class TaskDispatcher extends events.EventEmitter {
           index: 1
         })
         if (list.length) {
-          console.log('batch list', list.length)
-          let complete_files = await copyDirSeries(list, { application, save_drive_id: this.save_drive_id })
+          let index = list[0].index
+          let filter_list = list.filter(f => f.index === index)
+          console.log('batch filter_list', filter_list.length)
+          let complete_files = await copyDirSeries(filter_list, { application, save_drive_id: this.save_drive_id })
           this.emit('dealed_items', {
             num: complete_files.length,
             size: 0
@@ -360,7 +331,7 @@ class TaskDispatcher extends events.EventEmitter {
         }
 
         await new Promise(resolve => {
-          setTimeout(() => resolve(), 50)
+          setTimeout(() => resolve(), 10)
         })
       } while (list.length)
 
@@ -387,7 +358,7 @@ class TaskDispatcher extends events.EventEmitter {
         }
 
         await new Promise(resolve => {
-          setTimeout(() => resolve(), 50)
+          setTimeout(() => resolve(), 10)
         })
       } while (list.length)
       this.emit('completeTask')

@@ -59,6 +59,7 @@ exports.default = async (req, res, application) => {
           file_mimetype: result.mimeType,
           is_copyed: false,
           is_root: true,
+          index: 0,
           create_time: current_time,
           update_time: current_time
         })
@@ -73,7 +74,7 @@ exports.default = async (req, res, application) => {
           }),
           is_listed: false,
           is_complete: false,
-          total_items: 0,
+          total_items: 1,
           total_size: 0,
           dealed_items: 0,
           dealed_size: 0,
