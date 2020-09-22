@@ -111,8 +111,11 @@ export default {
         key: 'task_id',
         slot: 'task_id'
       }, {
-        title: '来源ID',
+        title: '来源磁盘',
         key: 'folder_id'
+      }, {
+        title: '目标磁盘',
+        key: 'drive_id'
       }, {
         title: '任务进度(已完成/总数)',
         slot: 'dealed_items',
