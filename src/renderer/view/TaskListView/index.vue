@@ -111,6 +111,9 @@ export default {
         key: 'task_id',
         slot: 'task_id'
       }, {
+        title: '来源ID',
+        key: 'folder_id'
+      }, {
         title: '任务进度(已完成/总数)',
         slot: 'dealed_items',
         key: 'dealed_items'
