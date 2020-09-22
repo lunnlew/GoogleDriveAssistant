@@ -1,10 +1,17 @@
 const fs = require('fs-extra');
-const { credentialsPath } = require('../config').default;
+const { keyPath, credentialsPath } = require('../config').default;
 exports.default = async (req, res) => {
+  if (!fs.existsSync(keyPath)) {
+    res.send({
+      'code': 10012,
+      'message': '需要提供keys文件'
+    })
+    return
+  }
   if (!fs.existsSync(credentialsPath)) {
     res.send({
       'code': 10010,
-      'message': 'error'
+      'message': '需要提供credentials文件'
     })
     return
   }

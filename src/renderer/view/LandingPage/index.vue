@@ -3,18 +3,50 @@
     <div class="main">
       <div class="tip" v-if="!initSuccess">
         <p class="tip-text">还没有您的授权记录，请点击下面的按钮进行授权</p>
-        <button @click="requestAuthorize">GoogleDrive授权</button>
+        <button @click="showAuthorize">GoogleDrive授权</button>
       </div>
     </div>
+    <Modal v-model="newKeysModel">
+      <p slot="header" style="color:#f60;text-align:center">
+        <Icon type="ios-information-circle"></Icon>
+        <span>填写keys</span>
+      </p>
+      <div>
+        <div style="padding-bottom: 10px">
+          <Form :model="formItem" :label-width="80">
+            <FormItem label="keys">
+              <Input
+                v-model="formItem.keys"
+                type="textarea"
+                :autosize="{minRows: 2,maxRows: 5}"
+                placeholder="{}"
+              />
+            </FormItem>
+          </Form>
+          <Alert :type="alertType" v-if="showAlert">{{alertInfo}}</Alert>
+        </div>
+      </div>
+      <div slot="footer">
+        <Button type="primary" size="large" long @click="saveKeys">提交</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 <script>
-import { checkInit, requestAuthorize } from '@/api/source'
+import { checkInit, requestAuthorize, saveKeys } from '@/api/source'
 export default {
   name: 'landing-page',
   data: () => {
     return {
-      initSuccess: false
+      formItem: {
+        keys: '{}'
+      },
+      initSuccess: false,
+      newKeysModel: false,
+      errorCode: 200,
+      showAlert: false,
+      alertType: 'success',
+      alertInfo: ''
     }
   },
   async mounted () {
@@ -25,9 +57,30 @@ export default {
       this.$router.push({
         path: '/Main'
       })
+    } else {
+      this.errorCode = res.code
     }
   },
   methods: {
+    async showAuthorize () {
+      if (this.errorCode === 10012) {
+        this.newKeysModel = true
+      } else {
+        await this.requestAuthorize()
+      }
+    },
+    async saveKeys () {
+      this.showAlert = false
+      let res = await saveKeys(this.formItem)
+      if (res.code == 200) {
+        this.newKeysModel = false
+        await this.requestAuthorize()
+      } else {
+        this.showAlert = true
+        this.alertType = 'error'
+        this.alertInfo = res.message
+      }
+    },
     async requestAuthorize () {
       let res = await requestAuthorize()
       if (res.code == 200) {

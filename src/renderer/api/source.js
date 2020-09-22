@@ -22,6 +22,18 @@ export function requestAuthorize (data) {
   })
 }
 
+export function saveKeys (data) {
+  return request({
+    url: '/',
+    method: 'post',
+    params: {
+      action: 'authorize',
+      ctl: 'saveKeys'
+    },
+    data
+  })
+}
+
 export function fetchTaskList (params, data) {
   return request({
     url: '/',
