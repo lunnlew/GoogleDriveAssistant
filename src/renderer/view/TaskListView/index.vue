@@ -219,10 +219,21 @@ export default {
         size = size.toFixed(2);//保留的小数位数
         return size + unitArr[index];
       }
-      let dealed_items = taskStatus && taskStatus['dealed_items'] ? row['dealed_items'] + taskStatus['dealed_items'] : row['dealed_items']
-      let dealed_size = taskStatus && taskStatus['dealed_size'] ? row['dealed_size'] + taskStatus['dealed_size'] : row['dealed_size']
-      let total_items = taskStatus && taskStatus['total_items'] ? row['total_items'] + taskStatus['total_items'] : row['total_items']
-      let total_size = taskStatus && taskStatus['total_size'] ? row['total_size'] + taskStatus['total_size'] : row['total_size']
+      let dealed_items = 0
+      let dealed_size = 0
+      let total_items = 0
+      let total_size = 0
+      if (taskStatus && 'type' in taskStatus) {
+        if (type === 'complete') {
+          dealed_items = total_items = row['total_items']
+          dealed_size = total_size = row['total_size']
+        }
+      } else {
+        dealed_items = taskStatus && taskStatus['dealed_items'] ? row['dealed_items'] + taskStatus['dealed_items'] : row['dealed_items']
+        dealed_size = taskStatus && taskStatus['dealed_size'] ? row['dealed_size'] + taskStatus['dealed_size'] : row['dealed_size']
+        total_items = taskStatus && taskStatus['total_items'] ? row['total_items'] + taskStatus['total_items'] : row['total_items']
+        total_size = taskStatus && taskStatus['total_size'] ? row['total_size'] + taskStatus['total_size'] : row['total_size']
+      }
       return `(文件:${dealed_items || 0}/${total_items || 0}, 大小:${buildSize(dealed_size || 0)}/${buildSize(total_size || 0)})`
     },
     buildInfo (record) {

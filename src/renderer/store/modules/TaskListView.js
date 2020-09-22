@@ -15,7 +15,9 @@ const mutations = {
   },
   resetTaskStatus (state, data) {
     if (data.task_id in state.taskStatus) {
-      state.taskStatus[data.task_id] = {}
+      state.taskStatus[data.task_id] = {
+        type: data.type
+      }
     }
   },
   updateTaskStatus (state, data) {

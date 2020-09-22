@@ -33,7 +33,8 @@ socket.addEventListener('message', function (event) {
       }, 500)
       if (payload.event === 'completeTask') {
         store.dispatch('resetTaskStatus', {
-          'task_id': payload.task_id
+          'task_id': payload.task_id,
+          'type': 'complete'
         })
       }
     }
