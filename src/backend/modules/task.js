@@ -48,7 +48,7 @@ exports.default = async (req, res, application) => {
           message: '当前目录已处理过'
         })
       } else {
-        let task_id = v4().replace(/-/g, '')
+        let task_id = v4().replace(/-/g, '').substr(0, 6)
         application.recorder.insertItem({
           item_type: 'file',
           task_id: task_id,
