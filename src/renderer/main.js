@@ -31,9 +31,11 @@ socket.addEventListener('message', function (event) {
           'loading': false
         })
       }, 500)
-      store.dispatch('resetTaskStatus', {
-        'task_id': payload.task_id
-      })
+      if (payload.event === 'completeTask') {
+        store.dispatch('resetTaskStatus', {
+          'task_id': payload.task_id
+        })
+      }
     }
     if (payload.errors && payload.errors[0].domain === 'AuthExpired') {
       router.push({
