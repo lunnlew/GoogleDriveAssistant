@@ -227,7 +227,7 @@ export default {
       let total_items = 0
       let total_size = 0
       if (taskStatus && 'type' in taskStatus) {
-        if (type === 'complete') {
+        if (taskStatus['type'] === 'complete') {
           dealed_items = total_items = row['total_items']
           dealed_size = total_size = row['total_size']
         }
