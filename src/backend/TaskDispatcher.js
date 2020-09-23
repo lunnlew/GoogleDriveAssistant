@@ -307,7 +307,7 @@ class TaskDispatcher extends events.EventEmitter {
       } while (dst_list.length)
 
       let page = 1
-      size = 5
+      size = 10
       let index
       do {
         list = await recorder.findItems({ 'item_type': 'file', 'task_id': task_id, 'file_mimetype': 'application/vnd.google-apps.folder', 'is_copyed': false }, page, size, {
