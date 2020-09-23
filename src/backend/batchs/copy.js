@@ -8,7 +8,7 @@ async function copyDirSeries (files, options) {
   var complete_files = []
   console.log('copyDirSeries to drive_id', save_drive_id)
   return new Promise((resolve, reject) => {
-    async.eachSeries(files, function (file, copyCallback) {
+    async.eachLimit(files, 5, function (file, copyCallback) {
       drive.files.create({
         supportsAllDrives: true,
         requestBody: {
