@@ -2,7 +2,7 @@
   <div class="ContainerView">
     <div class="pageHeader">
       <div class="pageHeaderLeft">
-        <Button type="primary" :loading="syncLoading" @click="syncList">同步数据</Button>
+        <Button type="primary" :loading="syncLoading" @click="syncList">同步磁盘信息</Button>
       </div>
       <div class="pageHeaderRight"></div>
     </div>
@@ -94,10 +94,7 @@ export default {
     },
     async syncList () {
       this.syncLoading = true
-      let res = await syncDriveList({
-        page: this.currentPage,
-        size: this.pageSize
-      })
+      let res = await syncDriveList()
       if (res && res.code == 200) {
         this.driveList = res.data.list
         this.total = res.data.total

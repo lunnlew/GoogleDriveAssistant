@@ -2,6 +2,7 @@
   <div class="ContainerView">
     <div class="pageHeader">
       <div class="pageHeaderLeft">
+        <Button type="primary" :loading="syncLoading" @click="syncAccountList">同步服务账号</Button>
         <Button type="primary" @click="showcreateServiceAccounts">新建账号</Button>
       </div>
       <div class="pageHeaderRight"></div>
@@ -21,7 +22,7 @@
             >{{ row.dealed_items}} / {{ row.total_items}}</template>
 
             <template slot-scope="{ row }" slot="actions">
-              <Button type="primary" @click="deleteItem(row)">删除</Button>
+              <Button type="error" @click="deleteItem(row)">删除</Button>
             </template>
           </Table>
           <div style="text-align: left;margin-top: 30px;">
@@ -71,7 +72,7 @@
   </div>
 </template>
 <script>
-import { listServiceAccounts, createServiceAccounts, deleteServiceAccount } from '@/api/source'
+import { listServiceAccounts, createServiceAccounts, deleteServiceAccount, syncAccountList } from '@/api/source'
 export default {
   name: 'accountsListView',
   components: {},
@@ -82,6 +83,7 @@ export default {
       showExtraInfo: false,
       showExtraData: {},
       createLoading: false,
+      syncLoading: false,
       currentPage: 1,
       pageSize: 10,
       alertType: 'success',
@@ -178,6 +180,16 @@ export default {
       } else {
 
       }
+    },
+    async syncAccountList () {
+      this.syncLoading = true
+      let res = await syncAccountList()
+      if (res && res.code == 200) {
+        this.loadData()
+      }
+      setTimeout(() => {
+        this.syncLoading = false
+      }, 500)
     }
   },
   async mounted () { },

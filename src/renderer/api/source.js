@@ -103,6 +103,17 @@ export function listServiceAccounts (data) {
     data
   })
 }
+export function syncAccountList (data) {
+  return request({
+    url: '/',
+    method: 'post',
+    params: {
+      action: 'serviceAccount',
+      ctl: 'sync'
+    },
+    data
+  })
+}
 export function deleteServiceAccount (data) {
   return request({
     url: '/',

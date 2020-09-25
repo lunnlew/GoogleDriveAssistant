@@ -27,7 +27,9 @@ async function googleInit (application, use_service_account) {
   let credentials
 
   // if (application && use_service_account) {
-  //   let list = await application.recorder.findItems({ 'item_type': 'serviceAccount', 'enable': true }, 1, 1)
+  //   let list = await application.recorder.findItems({ 'item_type': 'serviceAccount', 'enable': true, 'privateKeyData':{
+  // $ne: '' 
+  // } }, 1, 1)
   //   if (list && list.length) {
   //     oAuth2Client = google.auth.fromJSON(JSON.parse(new Buffer(list[0].privateKeyData, 'base64').toString()))
   //     credentials = await oAuth2Client.getCredentials()

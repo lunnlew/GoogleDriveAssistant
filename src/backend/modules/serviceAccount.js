@@ -12,6 +12,40 @@ exports.default = async (req, res, app) => {
   console.log(ctl)
   //https://console.cloud.google.com/cloud-resource-manager?folder=&organizationId=0
   switch (ctl) {
+    case 'sync': {
+      const { google, credentials } = await googleInit()
+      const resource = google.cloudresourcemanager('v1beta1')
+      let response = (await resource.projects.list({
+        filter: `lifecycleState:ACTIVE`,
+      })).data
+      if ('projects' in response) {
+        for (let project of response.projects) {
+          let IamPolicys = (await resource.projects.getIamPolicy({
+            resource: `${project.projectNumber}`
+          })).data
+          if ('bindings' in IamPolicys) {
+            for (let bindings of IamPolicys.bindings) {
+              await app.recorder.insertItem(bindings.members.filter(m => m.indexOf('serviceAccount:') === 0).map(m => {
+                return {
+                  'item_type': 'serviceAccount',
+                  'projectId': project.projectId,
+                  'enable': true,
+                  'email': m.replace('serviceAccount:', ''),
+                  'uniqueId': '',
+                  'name': `rojects/${project.projectId}/serviceAccounts/` + m.replace('serviceAccount:', ''),
+                  'privateKeyData': ''
+                }
+              }))
+            }
+          }
+        }
+      }
+      res.send({
+        code: 200,
+        msg: 'success'
+      })
+      break
+    }
     case "create": {
       const { google, credentials } = await googleInit()
       const resource = google.cloudresourcemanager('v1beta1')
