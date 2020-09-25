@@ -18,9 +18,10 @@ exports.default = async (req, res) => {
     }
     default: {
       console.log('use keyPath', keyPath)
-      let keys = { redirect_uris: [''] };
+      let keys = {};
       if (fs.existsSync(keyPath)) {
-        keys = fs.readJSONSync(keyPath).web;
+        let json = fs.readJSONSync(keyPath)
+        keys = json.web || json.installed;
       } else {
         res.send({
           'code': 10012,
@@ -32,7 +33,7 @@ exports.default = async (req, res) => {
       const oauth2Client = new google.auth.OAuth2(
         keys.client_id,
         keys.client_secret,
-        keys.redirect_uris[0]
+        'http://localhost:3000/oauth2callback'
       );
 
       google.options({ auth: oauth2Client });

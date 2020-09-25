@@ -67,12 +67,13 @@ async function googleInit (application, use_service_account) {
   // }
 
   if (!is_use_service_account) {
-    let keys = { redirect_uris: [''] };
+    let keys = {};
     if (fs.existsSync(keyPath)) {
-      keys = fs.readJSONSync(keyPath).web;
+      let json = fs.readJSONSync(keyPath)
+      keys = json.web || json.installed;
     }
-    const { client_secret, client_id, redirect_uris } = keys;
-    oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+    const { client_secret, client_id } = keys;
+    oAuth2Client = new google.auth.OAuth2(client_id, client_secret, 'http://localhost:3000/oauth2callback');
 
     if (fs.existsSync(credentialsPath)) {
       credentials = fs.readJSONSync(credentialsPath);

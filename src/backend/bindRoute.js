@@ -29,9 +29,10 @@ var bindRoute = (app, express) => {
     const qs = new url.URL(req.url, 'http://localhost:3000')
       .searchParams;
     console.log('use keyPath', keyPath)
-    let keys = { redirect_uris: [''] };
+    let keys = {};
     if (fs.existsSync(keyPath)) {
-      keys = fs.readJSONSync(keyPath).web;
+      let json = fs.readJSONSync(keyPath)
+      keys = json.web || json.installed;
     } else {
       res.send({
         'code': 10010,
@@ -42,7 +43,7 @@ var bindRoute = (app, express) => {
     const oauth2Client = new google.auth.OAuth2(
       keys.client_id,
       keys.client_secret,
-      keys.redirect_uris[0]
+      'http://localhost:3000/oauth2callback'
     );
     const { tokens } = await oauth2Client.getToken(qs.get('code'));
     console.log('use credentialsPath', keyPath)

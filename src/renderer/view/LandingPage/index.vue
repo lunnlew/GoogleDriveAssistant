@@ -6,20 +6,20 @@
         <button @click="showAuthorize">GoogleDrive授权</button>
       </div>
     </div>
-    <Modal v-model="newKeysModel">
+    <Modal v-model="newKeysModel" width="50%">
       <p slot="header" style="color:#f60;text-align:center">
         <Icon type="ios-information-circle"></Icon>
-        <span>填写keys</span>
+        <span>填写OAuth客户端凭据</span>
       </p>
       <div>
         <div style="padding-bottom: 10px">
-          <Form :model="formItem" :label-width="80">
-            <FormItem label="keys">
+          <Form :model="formItem" :label-width="0">
+            <FormItem label>
               <Input
                 v-model="formItem.keys"
                 type="textarea"
-                :autosize="{minRows: 2,maxRows: 5}"
-                placeholder="{}"
+                :autosize="{minRows: 15, maxRows: 20}"
+                placeholder="请从GCP下载OAuth客户端凭据文件，将内容填写在文本框中"
               />
             </FormItem>
           </Form>
@@ -39,7 +39,7 @@ export default {
   data: () => {
     return {
       formItem: {
-        keys: '{}'
+        keys: ''
       },
       initSuccess: false,
       newKeysModel: false,
